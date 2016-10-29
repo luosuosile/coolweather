@@ -17,7 +17,10 @@ import com.coolweather.app.util.Utilty;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -48,6 +51,13 @@ public class ChooseAreaActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
+		SharedPreferences prefs=PreferenceManager.getDefaultSharedPreferences(this);
+		if(prefs.getBoolean("city_selected", false)){
+			Intent intent=new Intent(this,WeatherActivity.class);
+			startActivity(intent);
+			finish();
+			return;
+		}
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.area);
 		listView =(ListView)findViewById(R.id.list_veiw);
@@ -61,10 +71,15 @@ public class ChooseAreaActivity extends Activity {
 				if(currentLevel ==LEVEL_PROVINCE){
 					selectedProvince=provinceList.get(index);
 					queryCities();
-					
 				}else if(currentLevel==LEVEL_CITY){
 					selectedCity=cityList.get(index);
 					queryCounties();
+				}else if(currentLevel==LEVEL_COUNTY){
+					String countyCode=countyList.get(index).getCountyCode();
+					Intent intent=new Intent(ChooseAreaActivity.this,WeatherActivity.class);
+					intent.putExtra("county_code", countyCode);
+					startActivity(intent);
+					finish();
 				}
 			}
 		});
@@ -157,7 +172,7 @@ public class ChooseAreaActivity extends Activity {
 				}
 				if(result){
 					//通过runOnUiThread()方法回到主线程处理逻辑
-					runOnUiThread(new Runnable() {
+					runOnUiThread(new Runnable(){
 						@Override
 						public void run(){
 							closeProgressDialog();
@@ -188,7 +203,6 @@ public class ChooseAreaActivity extends Activity {
 						
 					}
 				});
-				
 			}
 		});
 	}
